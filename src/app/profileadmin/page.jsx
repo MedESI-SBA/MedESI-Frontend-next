@@ -91,7 +91,7 @@ export default function ProfileDoctor() {
       {/* Main Content */}
       <main className="flex-1 p-8 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800">Doctor Profile</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Admin Profile</h2>
           <button className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white px-10 py-1.5 rounded-lg transition">Edit</button>
         </div>
         <section className="mt-8">
@@ -108,7 +108,7 @@ export default function ProfileDoctor() {
               { label: 'Phone Number', value: '0657 63 79 49' },
               { label: 'Email', value: 't.meliani@esi-sba.dz' },
               { label: 'Scolarity Year', value: '2024/2025' },
-              { label: 'last available', value: '24-12-2024 14:30' },
+              { label: 'Roles', value: 'Moderation | Logs | Chat | User Management' },
               { label: 'ID', value: '11' },
             ].map((field, index) => (
               <div key={index}>

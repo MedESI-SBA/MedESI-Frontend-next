@@ -91,7 +91,7 @@ export default function ProfileDoctor() {
       {/* Main Content */}
       <main className="flex-1 p-8 bg-white rounded-lg shadow-md">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-800">Doctor Profile</h2>
+          <h2 className="text-2xl font-bold text-gray-800">Patient Profile</h2>
           <button className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white px-10 py-1.5 rounded-lg transition">Edit</button>
         </div>
         <section className="mt-8">
@@ -108,8 +108,10 @@ export default function ProfileDoctor() {
               { label: 'Phone Number', value: '0657 63 79 49' },
               { label: 'Email', value: 't.meliani@esi-sba.dz' },
               { label: 'Scolarity Year', value: '2024/2025' },
-              { label: 'last available', value: '24-12-2024 14:30' },
+              { label: 'Type', value: 'Student' },
               { label: 'ID', value: '11' },
+              { label: 'Age', value: '21' },
+              { label: 'Address', value: 'Canastel Oran' },
             ].map((field, index) => (
               <div key={index}>
                 <label className="text-black text-sm font-medium">{field.label}</label>
@@ -119,8 +121,18 @@ export default function ProfileDoctor() {
                   className="w-full bg-gray-200 px-3 py-2 rounded-lg mt-1 text-gray-600" 
                   disabled 
                 />
+
               </div>
+            
+        
+
             ))}
+          </div>
+          <div className="mt-6">
+                  <label className="text-black text-sm font-medium">Medical History</label>
+                  
+                    <button className="bg-[#E85B5B] hover:bg-[#E85B5B] cursor-pointer text-white px-10 py-1.5 rounded-lg transition flex items-center gap-2 mt-2">View</button>
+
           </div>
         </section>
       </main>

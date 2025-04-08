@@ -138,7 +138,7 @@ export default function ProfileDoctor() {
       </main>
       
       {/* Right Panel */}
-      <aside className="w-80 bg-white p-6 shadow-xl rounded-2xl">
+<aside className="w-80 bg-white p-6 shadow-xl rounded-2xl">
   {/* Notifications Section */}
   <h2 className="text-lg font-semibold text-gray-800 mb-4"> Notifications</h2>
   <ul className="text-[13px] space-y-3">

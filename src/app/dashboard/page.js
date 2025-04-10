@@ -91,11 +91,14 @@ export default function Dashboard() {
     phone: '0667 63 78 49',
     birth: '1989-01-01',
   });
-
+  const [file, setFile] = useState(null); 
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
 
   // --- Component JSX ---
   return (
-    <>
+    <ProtectedRoute>
       <div className="flex h-screen bg-main-bg"> {/* Overall Flex Container */}
 
         {/* --- Sidebar --- */}
@@ -224,9 +227,12 @@ export default function Dashboard() {
                       <LuUpload size={32} className="mb-2 text-gray-400" />
                       <p className="text-sm mb-2">Drag & Drop your file</p>
                       <p className="text-xs mb-3">or</p>
-                      <button className="bg-white text-blue-600 border border-gray-300 hover:bg-gray-50 text-sm font-medium py-1.5 px-4 rounded-md">
-                        Browse
-                      </button>
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    className="bg-white text-blue-600 border border-gray-300 hover:bg-gray-50 text-sm font-medium py-1.5 px-4 rounded-md"
+                  />
+                  {file && <p className="mt-2 text-gray-700">File selected: {file.name}</p>}
                     </div>
                   </div>
                 </div>
@@ -344,6 +350,6 @@ export default function Dashboard() {
           </div> {/* End Scrollable Content */}
         </div> {/* End Main Content Area */}
       </div> {/* End Overall Flex Container */}
-    </>
+    </ProtectedRoute>
   );
 }

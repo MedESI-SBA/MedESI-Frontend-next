@@ -8,7 +8,8 @@ const ProtectedRoute = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
       router.push("/"); 
     }
   }, [isAuthenticated, router]);

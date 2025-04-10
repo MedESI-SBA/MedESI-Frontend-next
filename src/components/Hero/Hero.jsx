@@ -33,38 +33,60 @@ const Hero = ({ showLogin, setShowLogin }) => {
     
     try {
       setIsSubmitting(true);
-      
-      // First get CSRF cookie
+  
       await axios.get("/sanctum/csrf-cookie");
-      
-      const response = await axios.post("/api/login", {
+  
+      // Try logging in with "doctor"
+      let response = await axios.post("/api/login", {
         email: email,
         password: password,
         user_type: "doctor"
       });
   
       console.log("Login successful:", response.data);
-      
+  
       // Assuming your backend returns a token in the response
       const token = response.data.token;
-      
+  
       // Store the token and update auth state
       login(token);
-      
+  
       setShowLogin(false);
       setLoginError(null);
-      
+  
     } catch (error) {
-      console.error("Login failed:", error);
-      if (error.response?.data?.message) {
-        setLoginError(error.response.data.message);
-      } else {
-        setLoginError("Login failed. Please check your credentials.");
+      // If login with doctor fails, try with "admin"
+      console.log("Doctor login failed, trying admin...");
+  
+      try {
+        const response = await axios.post("/api/login", {
+          email: email,
+          password: password,
+          user_type: "admin"
+        });
+  
+        console.log("Login successful:", response.data);
+  
+        const token = response.data.token;
+  
+        login(token);
+  
+        setShowLogin(false);
+        setLoginError(null);
+  
+      } catch (error) {
+        console.error("Admin login failed:", error);
+        if (error.response?.data?.message) {
+          setLoginError(error.response.data.message);
+        } else {
+          setLoginError("Login failed. Please check your credentials.");
+        }
       }
     } finally {
       setIsSubmitting(false);
     }
   };
+  
   const handleForgotPassword = async () => {
     try {
       const response = await axios.post("/api/forgot-password", {

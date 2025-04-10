@@ -1,7 +1,8 @@
 "use client";
 import ProtectedRoute from "@/components/ProtectedRoute/ProtectedRoute";
-import React,{useState} from 'react'; // Import React
-import Image from 'next/image'; // Import Next Image
+import React,{useState} from 'react'; 
+import api from "@/lib/api";
+import Image from 'next/image'; 
 import {
   LuLayoutDashboard,
   LuActivity,
@@ -20,17 +21,13 @@ import {
   LuCalendarCheck,
   LuFileWarning,
   LuClock,
-  LuUpload, // ✅ Correct replacement
+  LuUpload, 
   LuPlus,
   LuMoreVertical
 } from 'react-icons/lu';
 
 
 export default function Dashboard() {
-
-  // --- Data usually fetched or defined elsewhere ---
-
-  // Sidebar Navigation Data
   const navItems = [
     { label: 'Default', icon: LuLayoutDashboard, active: true, category: 'Dashboards' },
     { label: 'Activities', icon: LuActivity, active: false, category: 'Dashboards' },
@@ -91,12 +88,40 @@ export default function Dashboard() {
     phone: '0667 63 78 49',
     birth: '1989-01-01',
   });
-  const [file, setFile] = useState(null); 
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
+  const handleUpload = async () => {
+    if (!file) {
+      setUploadError("Please select a file first.");
+      return;
+    }
 
-  // --- Component JSX ---
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      setUploading(true);
+      setUploadError(null);
+      const response = await api.post('/api/admins/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      console.log('File uploaded successfully:', response.data);
+    } catch (error) {
+      console.error('File upload failed:', error);
+      setUploadError("File upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <ProtectedRoute>
       <div className="flex h-screen bg-main-bg"> {/* Overall Flex Container */}
@@ -227,13 +252,21 @@ export default function Dashboard() {
                       <LuUpload size={32} className="mb-2 text-gray-400" />
                       <p className="text-sm mb-2">Drag & Drop your file</p>
                       <p className="text-xs mb-3">or</p>
-                  <input
-                    type="file"
-                    onChange={handleFileChange}
-                    className="bg-white text-blue-600 border border-gray-300 hover:bg-gray-50 text-sm font-medium py-1.5 px-4 rounded-md"
-                  />
-                  {file && <p className="mt-2 text-gray-700">File selected: {file.name}</p>}
+                      <input
+                        type="file"
+                        onChange={handleFileChange}
+                        className="bg-white text-blue-600 border border-gray-300 hover:bg-gray-50 text-sm font-medium py-1.5 px-4 rounded-md"
+                      />
+                      {file && <p className="mt-2 text-gray-700">File selected: {file.name}</p>}
                     </div>
+                    <button
+                      onClick={handleUpload}
+                      disabled={uploading}
+                      className="mt-4 bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium py-1.5 px-4 rounded-md"
+                    >
+                      {uploading ? 'Uploading...' : 'Upload'}
+                    </button>
+                    {uploadError && <p className="mt-2 text-red-500">{uploadError}</p>}
                   </div>
                 </div>
 

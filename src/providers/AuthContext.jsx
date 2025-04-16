@@ -10,17 +10,16 @@ export const AuthProvider = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Check for existing token on initial load
     const token = localStorage.getItem('auth_token');
     if (token) {
       setIsAuthenticated(true);
     }
   }, []);
 
-  const login = (token) => {
+  const login = (token,usertype) => {
     localStorage.setItem('auth_token', token);
     setIsAuthenticated(true);
-    router.push("/dashboard");
+    router.push(`/${usertype}/dashboard`);
   };
 
   const logout = () => {

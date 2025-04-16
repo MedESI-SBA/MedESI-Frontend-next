@@ -1,16 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
+import api from "@/lib/api";
 export default function ProfileDoctor() {
 
     const [openSections, setOpenSections] = useState({});
-
+    const [patientData, setpatientData] = useState(null);
     const toggleSection = (label) => {
       setOpenSections((prev) => ({
         ...prev,
         [label]: !prev[label],
       }));
     };
+    useEffect(() => {
+      const fetchpatientData = async () => {
+        try {
+          const response = await api.get("/api/doctors/me"); // Use the api instance to make the request
+          setpatientData(response.data);   
+        } catch (error) {
+          console.error("Error fetching patient data:", error);
+        }
+      };
+  
+      fetchpatientData();
+    }, []);
   return (
     <div className="flex h-full bg-gray-100">
       {/* Sidebar */}
@@ -98,20 +111,19 @@ export default function ProfileDoctor() {
           <div className="flex items-center space-x-6">
             <div className="w-24 h-24 bg-gray-300 rounded-full"></div>
             <div>
-              <h3 className="text-xl font-semibold text-gray-800">MILLIE MYERS</h3>
-              <p className="text-gray-400 text-sm">DOCTORINA@ESI-SBA.DZ</p>
+              <h3 className="text-xl font-semibold text-gray-800">{patientData?.firstName || 'Patinet name'} {patientData?.familyName}</h3>
+              <p className="text-gray-400 text-sm">{patientData?.email || 'Patient name'}</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-6 mt-6">
             {[
-              { label: 'Full Name', value: 'Meliani Tarek' },
-              { label: 'Phone Number', value: '0657 63 79 49' },
-              { label: 'Email', value: 't.meliani@esi-sba.dz' },
-              { label: 'Scolarity Year', value: '2024/2025' },
+              { label: 'Full Name', value: `${patientData?.firstName} ${patientData?.familyName}` },
+              { label: 'Phone Number', value: patientData?.phoneNumber },
+              { label: 'Email', value: patientData?.email },
               { label: 'Type', value: 'Student' },
               { label: 'ID', value: '11' },
               { label: 'Age', value: '21' },
-              { label: 'Address', value: 'Canastel Oran' },
+              { label: 'Address', value: patientData?.address},
             ].map((field, index) => (
               <div key={index}>
                 <label className="text-black text-sm font-medium">{field.label}</label>

@@ -33,10 +33,7 @@ const Hero = ({ showLogin, setShowLogin }) => {
     
     try {
       setIsSubmitting(true);
-  
       await axios.get("/sanctum/csrf-cookie");
-  
-      // Try logging in with "doctor"
       let response = await axios.post("/api/login", {
         email: email,
         password: password,
@@ -44,33 +41,24 @@ const Hero = ({ showLogin, setShowLogin }) => {
       });
   
       console.log("Login successful:", response.data);
-  
-      // Assuming your backend returns a token in the response
       const token = response.data.token;
-  
-      // Store the token and update auth state
-      login(token);
-  
+      const usertype="doctor";
+      login(token,usertype);
       setShowLogin(false);
       setLoginError(null);
   
     } catch (error) {
-      // If login with doctor fails, try with "admin"
       console.log("Doctor login failed, trying admin...");
-  
       try {
         const response = await axios.post("/api/login", {
           email: email,
           password: password,
           user_type: "admin"
         });
-  
         console.log("Login successful:", response.data);
-  
         const token = response.data.token;
-  
-        login(token);
-  
+        const usertype="admin";
+        login(token,usertype);
         setShowLogin(false);
         setLoginError(null);
   

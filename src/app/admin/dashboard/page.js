@@ -62,7 +62,6 @@ export default function Dashboard() {
       [label]: !prev[label],
     }));
   };
-  // Right Sidebar Data
   const notifications = [
     { id: 1, text: 'You have a student who submitted...', time: 'Just now', icon: LuUserPlus },
     { id: 2, text: 'Akram needs his medical history updated', time: '49 minutes ago', icon: LuFileWarning },
@@ -78,16 +77,6 @@ export default function Dashboard() {
     { id: 5, text: '2nd mc place holder', time: 'Feb 2, 2025', icon: LuUserPlus },
   ];
 
-  // Patient Table Data
-  const patientss = Array(10).fill({
-    id: '123',
-    name: 'Melliani Tarek',
-    avatar: 'pr2.svg', // <<< Make sure this path exists in your public folder
-    role: 'Patient',
-    email: 't.melloni@email-labz.ie',
-    phone: '0667 63 78 49',
-    birth: '1989-01-01',
-  });
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
@@ -103,6 +92,19 @@ export default function Dashboard() {
   const [doctorsError, setDoctorsError] = useState(null);
   const [adminsError, setAdminsError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    userType: 'patient',
+    email: '',
+    firstName: '',
+    familyName: '',
+    phoneNumber: '',
+    age: '',
+    patientType: 'student',
+    roles: [] 
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -241,6 +243,78 @@ export default function Dashboard() {
         field.toString().toLowerCase().includes(term)
       );
     });
+  };
+  const handleCreateAccountClick = () => {
+    setIsCreateModalOpen(true);
+    setSubmitError(null);
+  };
+  
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewUser(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError(null);
+  
+    // Validate roles based on user type
+    if ((newUser.userType === 'doctor' || newUser.userType === 'admin') && newUser.roles.length === 0) {
+      setSubmitError('Please select at least one role');
+      setIsSubmitting(false);
+      return;
+    }
+  
+    try {
+      const payload = {
+        email: newUser.email,
+        firstName: newUser.firstName,
+        familyName: newUser.familyName,
+        phoneNumber: newUser.phoneNumber,
+        age: parseInt(newUser.age),
+        role: newUser.userType,
+        roles: newUser.roles // Include roles for both doctors and admins
+      };
+  
+      if (newUser.userType === 'patient') {
+        payload.patient_type = newUser.patientType;
+        delete payload.roles; // Remove roles for patients
+      }
+  
+      const response = await api.post(`/api/admins/${newUser.userType}`, payload);
+      
+      // Refresh data
+      if (newUser.userType === 'patient') {
+        await fetchPatients();
+      } else if (newUser.userType === 'doctor') {
+        await fetchDoctors();
+      } else {
+        await fetchAdmins();
+      }
+  
+      // Reset form
+      setIsCreateModalOpen(false);
+      setNewUser({
+        userType: 'patient',
+        email: '',
+        firstName: '',
+        familyName: '',
+        phoneNumber: '',
+        age: '',
+        patientType: 'student',
+        roles: []
+      });
+  
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      setSubmitError(error.response?.data?.message || 'Failed to create user. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   return (
     <ProtectedRoute>
@@ -406,7 +480,7 @@ export default function Dashboard() {
                       <div className="flex flex-col items-center justify-center text-center text-gray-500 border-2 border-dashed border-gray-300 rounded-lg p-8 h-40">
                         <LuPlus size={32} className="mb-2 text-gray-400" />
                         <p className="text-sm mb-2">Add a new account manually</p>
-                        <button className="bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium py-1.5 px-4 rounded-md mt-3">
+                        <button onClick={handleCreateAccountClick} className="bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium py-1.5 px-4 rounded-md mt-3">
                           Create Account
                         </button>
                       </div>
@@ -609,6 +683,221 @@ export default function Dashboard() {
           </div>
         </div>
       </div> 
+      {/* Create User Modal */}
+{isCreateModalOpen && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-800">Create New User</h3>
+          <button 
+            onClick={() => setIsCreateModalOpen(false)}
+            className="text-gray-400 hover:text-gray-500"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            {/* User Type Dropdown */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">User Type</label>
+              <select
+                name="userType"
+                value={newUser.userType}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="patient">Patient</option>
+                <option value="doctor">Doctor</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+
+            {/* Patient Type Dropdown (conditionally shown) */}
+            {newUser.userType === 'patient' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Patient Type</label>
+                <select
+                  name="patientType"
+                  value={newUser.patientType}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                >
+                  <option value="student">Student</option>
+                  <option value="staff">Staff</option>
+                  <option value="faculty">Faculty</option>
+                </select>
+              </div>
+            )}
+
+            {/* Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                name="email"
+                value={newUser.email}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* First Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <input
+                type="text"
+                name="firstName"
+                value={newUser.firstName}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* Family Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Family Name</label>
+              <input
+                type="text"
+                name="familyName"
+                value={newUser.familyName}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* Phone Number */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <input
+                type="tel"
+                name="phoneNumber"
+                value={newUser.phoneNumber}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+
+            {/* Age */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
+              <input
+                type="number"
+                name="age"
+                min="1"
+                value={newUser.age}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            {/* Add this after the Age field in your modal form */}
+            {(newUser.userType === 'doctor' || newUser.userType === 'admin') && (
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Roles {newUser.userType === 'doctor' ? '(Select at least one)' : ''}
+    </label>
+    <div className="space-y-2">
+      {newUser.userType === 'doctor' ? (
+        // Doctor roles
+        ['general_practitioner', 'surgeon', 'specialist', 'resident'].map((role) => (
+          <div key={role} className="flex items-center">
+            <input
+              type="checkbox"
+              id={`role-${role}`}
+              checked={newUser.roles.includes(role)}
+              onChange={(e) => {
+                const { checked } = e.target;
+                setNewUser(prev => ({
+                  ...prev,
+                  roles: checked
+                    ? [...prev.roles, role]
+                    : prev.roles.filter(r => r !== role)
+                }));
+              }}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor={`role-${role}`} className="ml-2 block text-sm text-gray-700">
+              {role.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+            </label>
+          </div>
+        ))
+      ) : (
+        // Admin roles
+        ['admin', 'records_admin', 'billing_admin'].map((role) => (
+          <div key={role} className="flex items-center">
+            <input
+              type="checkbox"
+              id={`role-${role}`}
+              checked={newUser.roles.includes(role)}
+              onChange={(e) => {
+                const { checked } = e.target;
+                setNewUser(prev => ({
+                  ...prev,
+                  roles: checked
+                    ? [...prev.roles, role]
+                    : prev.roles.filter(r => r !== role)
+                }));
+              }}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor={`role-${role}`} className="ml-2 block text-sm text-gray-700">
+              {role.split('_').map(word => word.charAt(0) + word.slice(1)).join(' ')}
+            </label>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+)}
+          </div>
+
+          {/* Error Message */}
+          {submitError && (
+            <div className="mt-4 text-red-500 text-sm">{submitError}</div>
+          )}
+
+          {/* Form Actions */}
+          <div className="mt-6 flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={() => setIsCreateModalOpen(false)}
+              className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating...
+                </>
+              ) : 'Create User'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+)}
     </ProtectedRoute>
   );
 }

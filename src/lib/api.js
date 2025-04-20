@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://expert-duck-pleasing.ngrok-free.app/',
+  baseURL: 'http://localhost',
   withCredentials: true,
   withXSRFToken: true 
 });

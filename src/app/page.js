@@ -11,11 +11,11 @@ export default function Home() {
 
   return (
     <>
-      <Navbar showLogin={showLogin} setShowLogin={setShowLogin}/>
+      <Navbar showLogin={showLogin} setShowLogin={setShowLogin} />
       <Hero showLogin={showLogin} setShowLogin={setShowLogin} />
       <AboutSection />
       <How />
-      <Footer/>
+      <Footer />
     </>
   );
 }

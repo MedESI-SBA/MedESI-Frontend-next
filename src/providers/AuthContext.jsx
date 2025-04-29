@@ -10,20 +10,20 @@ export const AuthProvider = ({ children }) => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem("auth_token");
     if (token) {
       setIsAuthenticated(true);
     }
   }, []);
 
-  const login = (token,usertype) => {
-    localStorage.setItem('auth_token', token);
+  const login = (token, usertype) => {
+    localStorage.setItem("auth_token", token);
     setIsAuthenticated(true);
     router.push(`/${usertype}/dashboard`);
   };
 
   const logout = () => {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem("auth_token");
     setIsAuthenticated(false);
     router.push("/");
   };

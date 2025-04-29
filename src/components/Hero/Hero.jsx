@@ -9,8 +9,8 @@ const Hero = ({ showLogin, setShowLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState(null);
-  const [isSubmitting , setIsSubmitting] = useState(false)
-  const { isAuthenticated,login,logout, } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isAuthenticated, login, logout } = useAuth();
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [forgotPasswordMessage, setForgotPasswordMessage] = useState(null);
@@ -26,44 +26,36 @@ const Hero = ({ showLogin, setShowLogin }) => {
     };
   }, [showLogin]);
 
-
-
   const handleLogin = async () => {
     if (isSubmitting) return;
-    
+
     try {
       setIsSubmitting(true);
       await axios.get("/sanctum/csrf-cookie");
       let response = await axios.post("/api/login", {
         email: email,
         password: password,
-        user_type: "doctor"
+        user_type: "doctor",
       });
-  
-      console.log("Login successful:", response.data);
       const token = response.data.token;
-      const usertype="doctor";
-      login(token,usertype);
+      const usertype = "doctor";
+      login(token, usertype);
       setShowLogin(false);
       setLoginError(null);
-  
     } catch (error) {
       console.log("Doctor login failed, trying admin...");
       try {
         const response = await axios.post("/api/login", {
           email: email,
           password: password,
-          user_type: "admin"
+          user_type: "admin",
         });
-        console.log("Login successful:", response.data);
         const token = response.data.token;
-        const usertype="admin";
-        login(token,usertype);
+        const usertype = "admin";
+        login(token, usertype);
         setShowLogin(false);
         setLoginError(null);
-  
       } catch (error) {
-        console.error("Admin login failed:", error);
         if (error.response?.data?.message) {
           setLoginError(error.response.data.message);
         } else {
@@ -74,20 +66,26 @@ const Hero = ({ showLogin, setShowLogin }) => {
       setIsSubmitting(false);
     }
   };
-  
+
   const handleForgotPassword = async () => {
     try {
       const response = await axios.post("/api/forgot-password", {
         email: forgotPasswordEmail,
-        "user_type" : "doctor"
+        user_type: "doctor",
       });
 
       setForgotPasswordMessage(response.data.message);
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         setForgotPasswordMessage(error.response.data.message);
       } else {
-        setForgotPasswordMessage("Failed to send reset password link. Please try again.");
+        setForgotPasswordMessage(
+          "Failed to send reset password link. Please try again."
+        );
       }
     }
   };
@@ -110,8 +108,9 @@ const Hero = ({ showLogin, setShowLogin }) => {
             </span>
           </h1>
           <p className="text-gray-600 text-lg leading-relaxed px-2 sm:px-0">
-            Your well-being is our priority. MedEsi empowers you with cutting-edge healthcare
-            solutions, ensuring a healthier and brighter future.
+            Your well-being is our priority. MedEsi empowers you with
+            cutting-edge healthcare solutions, ensuring a healthier and brighter
+            future.
           </p>
           <button
             className="mt-6 px-6 py-3 text-white font-semibold text-lg bg-gradient-to-r from-[#2FD9FF] to-[#2E00FF] rounded-lg shadow-lg transition-all duration-300 hover:scale-105"
@@ -151,7 +150,9 @@ const Hero = ({ showLogin, setShowLogin }) => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 whileHover={{ rotate: 360, transition: { duration: 0.6 } }}
               />
-              <h2 className=" mt-4 text-2xl font-bold text-[#2E00FF]">Login</h2>
+              <h2 className=" mt-4 text-2xl font-bold text-[#2E00FF] cursor-pointer">
+                Login
+              </h2>
             </div>
             {loginError && <p className="text-red-500 mt-2">{loginError}</p>}
             <div className="mt-6 space-y-4">
@@ -174,7 +175,7 @@ const Hero = ({ showLogin, setShowLogin }) => {
             </div>
 
             <button
-              className="w-full mt-6 py-3 bg-[#2E00FF] text-white font-semibold rounded-md transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-[#1500ffe7] "
+              className="w-full mt-6 py-3 bg-[#2E00FF] cursor-pointer text-white font-semibold rounded-md transition-all duration-500 ease-in-out hover:scale-105 hover:shadow-lg hover:bg-[#1500ffe7] "
               onClick={handleLogin}
             >
               Login
@@ -191,7 +192,7 @@ const Hero = ({ showLogin, setShowLogin }) => {
           </div>
         </div>
       )}
-       {showForgotPassword && (
+      {showForgotPassword && (
         <div
           className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex justify-center items-center z-50"
           onClick={() => setShowForgotPassword(false)}
@@ -210,7 +211,9 @@ const Hero = ({ showLogin, setShowLogin }) => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 whileHover={{ rotate: 360, transition: { duration: 0.6 } }}
               />
-              <h2 className=" mt-4 text-2xl font-bold text-[#2E00FF]">Forgot Password</h2>
+              <h2 className=" mt-4 text-2xl font-bold text-[#2E00FF]">
+                Forgot Password
+              </h2>
             </div>
             {forgotPasswordMessage && (
               <p className="text-green-500 mt-2">{forgotPasswordMessage}</p>

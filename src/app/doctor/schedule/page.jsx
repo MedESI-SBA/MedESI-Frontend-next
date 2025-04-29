@@ -557,6 +557,19 @@ export default function ProfileDoctor() {
                                     View
                                   </button>
                                   <button
+                                    className="text-blue-600 hover:text-blue-900 mr-3 cursor-pointer"
+                                    onClick={() => {
+                                      const url = `/doctor/consultation/${
+                                        appointment.patient?.id
+                                      }?appointment=${encodeURIComponent(
+                                        JSON.stringify(appointment)
+                                      )}`;
+                                      router.push(url);
+                                    }}
+                                  >
+                                    Consult
+                                  </button>
+                                  <button
                                     className="text-red-600 hover:text-red-900 cursor-pointer"
                                     onClick={() =>
                                       handleCancelAppointment(appointment.id)
